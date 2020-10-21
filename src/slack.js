@@ -119,10 +119,9 @@ module.exports = async (options) => {
     )
   }
 
-  const hasConfiguredMail = !!workspaceToUpdate.email
-  const configuredMailsMatch = workspaceToUpdate.email === email
+  const hasConfiguredMail = !!workspaceToUpdate.emails
 
-  if (!hasConfiguredMail || (hasConfiguredMail && configuredMailsMatch)) {
+  if (hasConfiguredMail && workspaceToUpdate.emails.split(' ').includes(email)) {
     const isInMeeting = presenceStatus === ZOOM_IN_MEETING_STATUS
     const status = isInMeeting ? 'meetingStatus' : 'noMeetingStatus'
 
