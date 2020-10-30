@@ -122,6 +122,30 @@ module.exports = async (options) => {
   const hasConfiguredMail = !!workspaceToUpdate.emails
 
   if (hasConfiguredMail && workspaceToUpdate.emails.split(' ').includes(email)) {
+
+    // TODO To get this to work for multiple (any) users.
+    //
+    //// STEP 1 /////
+    // There needs to be a step  to get slack id for the allowed email.
+    // curl --location --request GET 'https://slack.com/api/users.lookupByEmail?email=johndoe@gatewaystaff.com' \
+    // --header 'Authorization: Bearer xoxp-576835227206-etc-etc' \
+    // --data-raw ''
+    //
+    //// STEP 2 /////
+    // Use the slack id grabbed in step 1 to update the specific user.
+    // curl --location --request POST 'https://slack.com/api/users.profile.set' \
+    // --header 'Authorization: Bearer xoxp-576835227206-etc-etc' \
+    // --header 'Content-Type: application/json' \
+    // --data-raw '{
+    //   "user": "USERS_SLACK_ID",
+    //   "profile": {
+    //     "status_text": "Using Zoom Dude",
+    //     "status_emoji": ":bacon:",
+    //     "status_expiration": 0
+    //   }
+    // }'
+
+
     const isInMeeting = presenceStatus === ZOOM_IN_MEETING_STATUS
     const status = isInMeeting ? 'meetingStatus' : 'noMeetingStatus'
 
