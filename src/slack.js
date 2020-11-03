@@ -16,11 +16,12 @@ const logger = require('./logger')
  *
  * @see https://api.slack.com/docs/presence-and-status
  */
-const updateSlackStatus = async (workspace, { token, text, emoji }) => {
+const updateSlackStatus = async (workspace, { token, text, emoji, slackId }) => {
   try {
     const response = await axios.post(
       'https://slack.com/api/users.profile.set',
       {
+        user: slackId,
         profile: {
           status_text: text || '',
           status_emoji: emoji || '',
@@ -92,6 +93,7 @@ const updateSlackDndStatus = async (
     }
 
     logger('SLACK', `workspace ${workspace.name} dnd updated`)
+
     return response
   } catch (error) {
     throw new Error(error)
@@ -134,28 +136,23 @@ module.exports = async (options) => {
   const hasConfiguredMails = !!emails;
 
   if (hasConfiguredMails && emails.includes(email)) {
-    // TODO To get this to work for multiple (any) users.
-    //
-    //// STEP 1 /////
-    // There needs to be a step  to get slack id for the allowed email.
-    // curl --location --request GET 'https://slack.com/api/users.lookupByEmail?email=johndoe@gatewaystaff.com' \
-    // --header 'Authorization: Bearer xoxp-576835227206-etc-etc' \
-    // --data-raw ''
-    //
-    //// STEP 2 /////
-    // Use the slack id grabbed in step 1 to update the specific user.
-    // curl --location --request POST 'https://slack.com/api/users.profile.set' \
-    // --header 'Authorization: Bearer xoxp-576835227206-etc-etc' \
-    // --header 'Content-Type: application/json' \
-    // --data-raw '{
-    //   "user": "USERS_SLACK_ID",
-    //   "profile": {
-    //     "status_text": "Using Zoom Dude",
-    //     "status_emoji": ":bacon:",
-    //     "status_expiration": 0
-    //   }
-    // }'
+    // Get the user's slack id.
+    const response = await axios.get(
+      `https://slack.com/api/users.lookupByEmail?email=${email}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.SLACK_TOKEN_1}`,
+          'content-type': 'application/x-www-form-urlencoded',
+        }
+      }
+    );
 
+    if (response.data.error) {
+      throw new Error(`SLACK could not get user id for ${email} - ${response.data.error}`)
+    }
+
+    // Users slack id.
+    const userSlackId = response.data.user.id;
 
     /**
      * Why `Do_Not_Disturb`?
@@ -172,14 +169,15 @@ module.exports = async (options) => {
           token: workspaceToUpdate.token,
           text: workspaceToUpdate[status].text,
           emoji: workspaceToUpdate[status].emoji,
+          slackId: userSlackId,
         }),
         // only change DnD when workspace configured dndNumMinutes
-        workspaceToUpdate.dndNumMinutes > 0 &&
-          updateSlackDndStatus(workspaceToUpdate, {
-            numMinutes: workspaceToUpdate.dndNumMinutes,
-            snooze: isInMeeting,
-            token: workspaceToUpdate.token,
-          }),
+        // workspaceToUpdate.dndNumMinutes > 0 &&
+        //   updateSlackDndStatus(workspaceToUpdate, {
+        //     numMinutes: workspaceToUpdate.dndNumMinutes,
+        //     snooze: isInMeeting,
+        //     token: workspaceToUpdate.token,
+        //   }),
       ].filter(Boolean),
     )
   } else {
