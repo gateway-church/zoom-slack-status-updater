@@ -113,7 +113,6 @@ dist
 
 # configs
 now.json
-slack-status-config.js
 
 # intellij stuff
 .idea
