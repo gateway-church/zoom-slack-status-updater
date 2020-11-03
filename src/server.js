@@ -10,6 +10,8 @@ const logger = require('./logger')
 
 const updateSlackStatus = require('./slack')
 
+const database = require('./db');
+
 const app = express()
 
 app.use(express.static(path.join(__dirname, 'assets')));
@@ -19,6 +21,75 @@ logger(path.join(__dirname, 'assets'));
 app.use(bodyParser.urlencoded({ extended: true }))
 
 app.use(bodyParser.json())
+
+/**
+ * API Endpoint for getting list of emails in DB.
+ *
+ */
+app.get('/api/v1/users', async (req, res, next) => {
+  const { rows } = await database.query(`SELECT email FROM users`);
+
+  // Collect email values.
+  const emails =  !!rows ? rows.reduce((map, row) =>  {
+    map.push(row['email']);
+
+    return map;
+  }, []) : [];
+
+  res.status(200).send(emails);
+});
+
+/**
+ * API Endpoint for adding email to DB.
+ *
+ */
+app.post('/api/v1/users', async (req, res, next) => {
+  logger('USERS CREATE REQUEST', req.body);
+
+  const emailAddress = get(req, 'body.email')
+
+  if (emailAddress) {
+    try {
+      await database.insert(`INSERT INTO users(email) VALUES($1)`, [emailAddress]);
+
+      res.sendStatus(201)
+    } catch (error) {
+      logger(error);
+
+      res.status(400).send({ message: error.message });
+    }
+  } else {
+    logger('User could not be created')
+
+    res.sendStatus(400)
+  }
+});
+
+/**
+ * API Endpoint for removing email from DB.
+ *
+ */
+app.delete('/api/v1/users', async (req, res, next) => {
+  logger('USERS DELETE REQUEST', req.body);
+
+  const emailAddress = get(req, 'body.email')
+
+  if (emailAddress) {
+    try {
+      await database.insert(`DELETE FROM users WHERE email=$1`, [emailAddress]);
+
+      res.sendStatus(200)
+    } catch(error) {
+      logger(error);
+
+      res.status(400).send({ message: error.message });
+    }
+  } else {
+    logger('User could not be created')
+
+    res.sendStatus(400)
+  }
+});
 
 /**
  * Webhook Endpoint called when "User’s presence status has been updated"

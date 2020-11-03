@@ -171,13 +171,6 @@ module.exports = async (options) => {
           emoji: workspaceToUpdate[status].emoji,
           slackId: userSlackId,
         }),
-        // only change DnD when workspace configured dndNumMinutes
-        // workspaceToUpdate.dndNumMinutes > 0 &&
-        //   updateSlackDndStatus(workspaceToUpdate, {
-        //     numMinutes: workspaceToUpdate.dndNumMinutes,
-        //     snooze: isInMeeting,
-        //     token: workspaceToUpdate.token,
-        //   }),
       ].filter(Boolean),
     )
   } else {
