@@ -4,8 +4,6 @@ const qs = require('qs')
 const slackWorkspaces = require('../slack-status-config')
 const logger = require('./logger')
 
-const { ZOOM_IN_MEETING_STATUS } = require('./config')
-
 /**
  * Update slack status
  *
@@ -119,6 +117,7 @@ module.exports = async (options) => {
     )
   }
 
+  // TODO Check db for email address.
   const hasConfiguredMail = !!workspaceToUpdate.emails
 
   if (hasConfiguredMail && workspaceToUpdate.emails.split(' ').includes(email)) {
@@ -146,7 +145,13 @@ module.exports = async (options) => {
     // }'
 
 
-    const isInMeeting = presenceStatus === ZOOM_IN_MEETING_STATUS
+    /**
+     * Why `Do_Not_Disturb`?
+     *
+     * @see https://devforum.zoom.us/t/check-if-a-user-is-on-a-call-or-available/6140/8
+     */
+    const isInMeeting = presenceStatus === process.env.ZOOM_STATUS;
+
     const status = isInMeeting ? 'meetingStatus' : 'noMeetingStatus'
 
     return axios.all(

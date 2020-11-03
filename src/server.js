@@ -1,13 +1,23 @@
 const express = require('express')
+
 const bodyParser = require('body-parser')
+
 const get = require('lodash.get')
 
+const path = require('path');
+
 const logger = require('./logger')
+
 const updateSlackStatus = require('./slack')
-const { ZOOM_IN_MEETING_STATUS } = require('./config')
 
 const app = express()
+
+app.use(express.static(path.join(__dirname, 'assets')));
+
+logger(path.join(__dirname, 'assets'));
+
 app.use(bodyParser.urlencoded({ extended: true }))
+
 app.use(bodyParser.json())
 
 /**
@@ -42,7 +52,7 @@ app.post('/', async (req, res, next) => {
 
 // this route only exists, so one can check if the server is online and running
 app.get('/', (_req, res) => {
-  res.send('I am online :)')
+  res.sendFile(path.join(__dirname, '..', 'index.html'));
 })
 
 /**
