@@ -1,7 +1,11 @@
 const axios = require('axios')
+
 const qs = require('qs')
 
 const slackWorkspaces = require('../slack-status-config')
+
+const database = require('./db');
+
 const logger = require('./logger')
 
 /**
@@ -117,11 +121,19 @@ module.exports = async (options) => {
     )
   }
 
-  // TODO Check db for email address.
-  const hasConfiguredMail = !!workspaceToUpdate.emails
+  // Get emails from the DB.
+  const { rows } = await database.query('SELECT email FROM users');
 
-  if (hasConfiguredMail && workspaceToUpdate.emails.split(' ').includes(email)) {
+  // Grab just the email values.
+  const emails =  !!rows ? rows.reduce((map, row) =>  {
+    map.push(row['email']);
 
+    return map;
+  }, []) : null;
+
+  const hasConfiguredMails = !!emails;
+
+  if (hasConfiguredMails && emails.includes(email)) {
     // TODO To get this to work for multiple (any) users.
     //
     //// STEP 1 /////

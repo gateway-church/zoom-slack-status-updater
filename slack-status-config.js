@@ -11,7 +11,12 @@ module.exports = [
      * events are filtered and slack updates are only done for this user
      * remove, if filtering is not intended
      */
-    emails: process.env.VALID_EMAILS,
+    /**
+     *
+     * Using pg DB for emails.
+     *
+     */
+    // emails: process.env.VALID_EMAILS,
     /**
      * either copy & paste the token string here or use
      * process.env.SLACK_TOKEN_1 (now secret add SLACK_TOKEN_1 "xoxp-xxx-xxx")
