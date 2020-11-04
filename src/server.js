@@ -133,8 +133,8 @@ app.post('/', async (req, res, next) => {
   }
 })
 
-// this route only exists, so one can check if the server is online and running
-app.get('/', (_req, res) => {
+// This is catch all get route leading to home page.
+app.get('/*', (_req, res) => {
   res.sendFile(path.join(__dirname, '..', 'index.html'));
 })
 
