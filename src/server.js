@@ -27,16 +27,20 @@ app.use(bodyParser.json())
  *
  */
 app.get('/api/v1/users', async (req, res, next) => {
-  const { rows } = await database.query(`SELECT email FROM users`);
+  if (req.headers['authorization'] === `Bearer ${process.env.GW_STATUS_API_KEY}`) {
+    const { rows } = await database.query(`SELECT email FROM users`);
 
-  // Collect email values.
-  const emails =  !!rows ? rows.reduce((map, row) =>  {
-    map.push(row['email']);
+    // Collect email values.
+    const emails =  !!rows ? rows.reduce((map, row) =>  {
+      map.push(row['email']);
 
-    return map;
-  }, []) : [];
+      return map;
+    }, []) : [];
 
-  res.status(200).send(emails);
+    res.status(200).send(emails);
+  } else {
+    res.sendStatus(401)
+  }
 });
 
 /**
@@ -44,24 +48,28 @@ app.get('/api/v1/users', async (req, res, next) => {
  *
  */
 app.post('/api/v1/users', async (req, res, next) => {
-  logger('USERS CREATE REQUEST', req.body);
+  if (req.headers['authorization'] === `Bearer ${process.env.GW_STATUS_API_KEY}`) {
+    logger('USERS CREATE REQUEST', req.body);
 
-  const emailAddress = get(req, 'body.email')
+    const emailAddress = get(req, 'body.email')
 
-  if (emailAddress) {
-    try {
-      await database.insert(`INSERT INTO users(email) VALUES($1)`, [emailAddress]);
+    if (emailAddress) {
+      try {
+        await database.insert(`INSERT INTO users(email) VALUES($1)`, [emailAddress]);
 
-      res.sendStatus(201)
-    } catch (error) {
-      logger(error);
+        res.sendStatus(201)
+      } catch (error) {
+        logger(error);
 
-      res.status(400).send({ message: error.message });
+        res.status(400).send({ message: error.message });
+      }
+    } else {
+      logger('User could not be created')
+
+      res.sendStatus(400)
     }
   } else {
-    logger('User could not be created')
-
-    res.sendStatus(400)
+    res.sendStatus(401)
   }
 });
 
@@ -70,24 +78,28 @@ app.post('/api/v1/users', async (req, res, next) => {
  *
  */
 app.delete('/api/v1/users', async (req, res, next) => {
-  logger('USERS DELETE REQUEST', req.body);
+  if (req.headers['authorization'] === `Bearer ${process.env.GW_STATUS_API_KEY}`) {
+    logger('USERS DELETE REQUEST', req.body);
 
-  const emailAddress = get(req, 'body.email')
+    const emailAddress = get(req, 'body.email')
 
-  if (emailAddress) {
-    try {
-      await database.insert(`DELETE FROM users WHERE email=$1`, [emailAddress]);
+    if (emailAddress) {
+      try {
+        await database.insert(`DELETE FROM users WHERE email=$1`, [emailAddress]);
 
-      res.sendStatus(200)
-    } catch(error) {
-      logger(error);
+        res.sendStatus(200)
+      } catch(error) {
+        logger(error);
 
-      res.status(400).send({ message: error.message });
+        res.status(400).send({ message: error.message });
+      }
+    } else {
+      logger('User could not be created')
+
+      res.sendStatus(400)
     }
   } else {
-    logger('User could not be created')
-
-    res.sendStatus(400)
+    res.sendStatus(401)
   }
 });
 

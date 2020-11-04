@@ -1,6 +1,36 @@
 # Zoom Slack Status Updater
 Update your Slack status automatically when you join a Zoom meeting.
 
+## GET LIST OF USERS
+```
+curl --location --request GET 'https://gw-status-updater.herokuapp.com/api/v1/users' \
+--header 'Accept: application/json' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer API_KEY_FOUND_IN_HEROKU_CONFIG' \
+```
+
+## CREATE USER
+```
+curl --location --request POST 'https://gw-status-updater.herokuapp.com/api/v1/users' \
+--header 'Accept: application/json' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer API_KEY_FOUND_IN_HEROKU_CONFIG' \
+--data-raw '{
+    "email": "johndoe@gatewaystaff.com"
+}'
+```
+
+## DELETE USER
+```
+curl --location --request DELETE 'https://gw-status-updater.herokuapp.com/api/v1/users' \
+--header 'Accept: application/json' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer API_KEY_FOUND_IN_HEROKU_CONFIG' \
+--data-raw '{
+    "email": "johndoe@gatewaystaff.com"
+}'
+```
+
 ## Requirements
 
 - a Zoom App
