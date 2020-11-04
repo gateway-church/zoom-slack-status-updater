@@ -55,7 +55,7 @@ app.post('/api/v1/users', async (req, res, next) => {
 
     if (emailAddress) {
       try {
-        await database.insert(`INSERT INTO users(email) VALUES($1)`, [emailAddress]);
+        await database.query_with_params(`INSERT INTO users(email) VALUES($1)`, [emailAddress]);
 
         res.sendStatus(201)
       } catch (error) {
@@ -85,7 +85,7 @@ app.delete('/api/v1/users', async (req, res, next) => {
 
     if (emailAddress) {
       try {
-        await database.insert(`DELETE FROM users WHERE email=$1`, [emailAddress]);
+        await database.query_with_params(`DELETE FROM users WHERE email=$1`, [emailAddress]);
 
         res.sendStatus(200)
       } catch(error) {
